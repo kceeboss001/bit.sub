@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Native Bitcoin Credit — OpNet P2P Lending</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM — PURPLE / BLACK THEME
+   ═══════════════════════════════════════════ */
+:root {
+  /* Core palette */
+  --bg:           #08060f;
+  --bg2:          #0e0b18;
+  --surface:      #130f22;
+  --surface2:     #1a1530;
+  --surface3:     #221d3c;
+
+  /* Borders */
+  --border:       #2a2245;
+  --border2:      #362d58;
+  --border-glow:  rgba(139,92,246,0.3);
+
+  /* Brand purple */
+  --purple:       #8b5cf6;
+  --purple-light: #a78bfa;
+  --purple-dark:  #6d28d9;
+  --purple-dim:   rgba(139,92,246,0.12);
+  --purple-glow:  rgba(139,92,246,0.25);
+
+  /* Accent */
+  --pink:         #ec4899;
+  --pink-dim:     rgba(236,72,153,0.12);
+
+  /* Semantic */
+  --green:        #10b981;
+  --green-dim:    rgba(16,185,129,0.1);
+  --green-border: rgba(16,185,129,0.25);
+  --red:          #f43f5e;
+  --red-dim:      rgba(244,63,94,0.1);
+  --yellow:       #f59e0b;
+  --yellow-dim:   rgba(245,158,11,0.1);
+  --blue:         #38bdf8;
+
+  /* Text */
+  --text-primary:  #e8e0ff;
+  --text-secondary:#9d8ec7;
+  --text-muted:    #5c5280;
+
+  /* Misc */
+  --r:    10px;
+  --r-sm: 6px;
+  --r-lg: 16px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --glow-purple: 0 0 40px rgba(139,92,246,0.2);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* ── Background atmosphere ── */
+.bg-mesh {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 10%, rgba(139,92,246,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 80%, rgba(109,40,217,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(236,72,153,0.03) 0%, transparent 70%);
+}
+
+/* Subtle grid overlay */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ═══════════════════════════════
+   HEADER
+═══════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 200;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  background: rgba(8,6,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(139,92,246,0.08);
+}
+
+.logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+
+.logo-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 24px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--purple-light);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.net-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 14px;
+  background: var(--green-dim);
+  border: 1px solid var(--green-border);
+  border-radius: 99px;
+  font-size: 11px; font-weight: 600;
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+.pulse-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  animation: pulseAnim 2s ease-in-out infinite;
+}
+@keyframes pulseAnim {
+  0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+}
+
+/* ═══════════════════════════════
+   WALLET BUTTON
+═══════════════════════════════ */
+#walletBtn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 20px;
+  background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+  color: #fff;
+  border: none; border-radius: var(--r);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(109,40,217,0.4);
+  position: relative; overflow: hidden;
+}
+#walletBtn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0; transition: opacity 0.25s;
+}
+#walletBtn:hover::after { opacity: 1; }
+#walletBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(109,40,217,0.5); }
+#walletBtn:active { transform: translateY(0); }
+#walletBtn.connected {
+  background: var(--surface2);
+  box-shadow: none;
+  border: 1px solid var(--border2);
+  color: var(--purple-light);
+}
+
+/* ═══════════════════════════════
+   APP LAYOUT
+═══════════════════════════════ */
+.app {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  min-height: calc(100vh - 64px);
+}
+
+/* ═══════════════════════════════
+   SIDEBAR
+═══════════════════════════════ */
+aside {
+  border-right: 1px solid var(--border);
+  padding: 20px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+  position: sticky; top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: rgba(8,6,15,0.5);
+}
+
+.nav-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 14px 14px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px; font-weight: 500;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  position: relative;
+}
+.nav-item .ni-emoji { font-size: 16px; flex-shrink: 0; }
+.nav-item:hover { background: var(--surface); color: var(--text-primary); }
+.nav-item.active {
+  background: var(--purple-dim);
+  color: var(--purple-light);
+  border-color: var(--border-glow);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; border-radius: 0 4px 4px 0;
+  background: var(--purple);
+}
+
+/* Sidebar stats box */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px;
+}
+.protocol-stats {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+}
+.ps-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.ps-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.ps-row:last-child { margin-bottom: 0; }
+.ps-key { font-size: 11px; color: var(--text-muted); }
+.ps-val { font-size: 12px; font-weight: 600; color: var(--purple-light); }
+
+/* ═══════════════════════════════
+   MAIN
+═══════════════════════════════ */
+main { padding: 28px 32px; overflow-y: auto; }
+
+.page { display: none; }
+.page.active {
+  display: block;
+  animation: fadeSlide 0.3s ease both;
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════
+   PAGE HEADERS
+═══════════════════════════════ */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px; letter-spacing: 0.06em;
+  color: var(--text-primary); line-height: 1;
+}
+.page-sub {
+  font-size: 13px; color: var(--text-muted);
+  margin-top: 4px; font-weight: 400;
+}
+
+/* ═══════════════════════════════
+   CARDS
+═══════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.card:hover { border-color: var(--border2); }
+.card-glow { box-shadow: var(--glow-purple); border-color: var(--border-glow); }
+
+.card-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 18px;
+}
+
+/* ═══════════════════════════════
+   STATS GRID
+═══════════════════════════════ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  transition: all 0.2s;
+}
+.stat-card:hover { border-color: var(--border-glow); box-shadow: var(--glow-purple); }
+.stat-icon { font-size: 20px; margin-bottom: 10px; display: block; }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+.stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: 0.04em;
+  color: var(--text-primary); line-height: 1;
+}
+.stat-value.purple { color: var(--purple-light); }
+.stat-value.green  { color: var(--green); }
+.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+/* ═══════════════════════════════
+   FORMS
+═══════════════════════════════ */
+.form-grid { display: grid; gap: 16px; }
+.form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.field-hint { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+.field-error { font-size: 11px; color: var(--red); margin-top: 3px; }
+
+input[type="text"],
+input[type="number"],
+textarea, select {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; font-weight: 400;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+}
+input::placeholder { color: var(--text-muted); }
+select { cursor: pointer; }
+select option { background: var(--bg2); }
+
+/* ═══════════════════════════════
+   BUTTONS
+═══════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 20px; border-radius: var(--r-sm);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: all 0.2s; white-space: nowrap;
+  text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(109,40,217,0.35);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(109,40,217,0.5); }
+.btn-primary:disabled { background: var(--surface3); color: var(--text-muted); box-shadow: none; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border2);
+}
+.btn-secondary:hover { border-color: var(--purple); color: var(--purple-light); }
+
+.btn-success {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(16,185,129,0.3);
+}
+.btn-success:hover { background: rgba(16,185,129,0.2); }
+
+.btn-danger {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(244,63,94,0.25);
+}
+.btn-danger:hover { background: rgba(244,63,94,0.2); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--purple-light);
+  border: 1px solid var(--border-glow);
+}
+.btn-outline:hover { background: var(--purple-dim); }
+
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-lg { padding: 13px 28px; font-size: 14px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* Loading spinner in button */
+.btn-loading { position: relative; color: transparent !important; pointer-events: none; }
+.btn-loading::after {
+  content: '';
+  position: absolute; inset: 0; margin: auto;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════
+   BADGES
+═══════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-purple { background: var(--purple-dim); color: var(--purple-light); border: 1px solid rgba(139,92,246,0.25); }
+.badge-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(16,185,129,0.25); }
+.badge-red    { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(244,63,94,0.25); }
+.badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+.badge-blue   { background: rgba(56,189,248,0.1); color: var(--blue); border: 1px solid rgba(56,189,248,0.25); }
+.badge-muted  { background: var(--surface3); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* ═══════════════════════════════
+   ALERTS / NOTICES
+═══════════════════════════════ */
+.alert {
+  display: flex; gap: 12px;
+  padding: 13px 16px;
+  border-radius: var(--r);
+  margin-bottom: 20px;
+  font-size: 13px; line-height: 1.6;
+}
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-info    { background: rgba(56,189,248,0.08);  border: 1px solid rgba(56,189,248,0.2);  color: var(--blue); }
+.alert-warn    { background: var(--yellow-dim); border: 1px solid rgba(245,158,11,0.25); color: var(--yellow); }
+.alert-success { background: var(--green-dim);  border: 1px solid var(--green-border);   color: var(--green); }
+.alert-purple  { background: var(--purple-dim); border: 1px solid var(--border-glow);    color: var(--purple-light); }
+
+/* ═══════════════════════════════
+   TABLE
+═══════════════════════════════ */
+.table-wrap { overflow-x: auto; border-radius: var(--r); }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; padding: 10px 16px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+thead th:first-child { border-radius: var(--r) 0 0 0; }
+thead th:last-child  { border-radius: 0 var(--r) 0 0; }
+tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 13px;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+
+/* ═══════════════════════════════
+   LOAN CARDS
+═══════════════════════════════ */
+.loan-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.loan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.loan-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--purple-dark), var(--purple));
+  opacity: 0; transition: opacity 0.2s;
+}
+.loan-card:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: var(--glow-purple); }
+.loan-card:hover::before { opacity: 1; }
+
+.lc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.lc-id { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.lc-body { display: grid; gap: 9px; margin-bottom: 16px; }
+.lc-row { display: flex; align-items: center; justify-content: space-between; }
+.lc-key { font-size: 12px; color: var(--text-muted); }
+.lc-val { font-size: 13px; color: var(--text-primary); font-weight: 600; }
+.lc-val.purple { color: var(--purple-light); }
+.lc-val.green  { color: var(--green); }
+.lc-val.red    { color: var(--red); }
+.lc-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.lc-actions { display: flex; gap: 8px; }
+
+/* ═══════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════ */
+.progress { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+.progress-fill.purple { background: linear-gradient(90deg, var(--purple-dark), var(--purple-light)); }
+.progress-fill.green  { background: var(--green); }
+.progress-fill.red    { background: var(--red); }
+.progress-fill.yellow { background: var(--yellow); }
+
+/* ═══════════════════════════════
+   CREDIT RING
+═══════════════════════════════ */
+.credit-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.credit-ring { position: relative; width: 140px; height: 140px; }
+.credit-ring svg { transform: rotate(-90deg); }
+.crb { fill: none; stroke: var(--border2); stroke-width: 10; }
+.crf {
+  fill: none; stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 408; stroke-dashoffset: 408;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.credit-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.credit-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px; color: var(--text-primary); line-height: 1;
+}
+.credit-grade { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: var(--purple-light); }
+
+/* ═══════════════════════════════
+   MODAL
+═══════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  width: 100%; max-width: 480px;
+  transform: scale(0.94) translateY(8px);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.1);
+}
+.overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; letter-spacing: 0.06em;
+  color: var(--text-primary);
+}
+.modal-close {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-muted); border-radius: var(--r-sm);
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text-primary); border-color: var(--border2); }
+
+/* Wallet option buttons in modal */
+.wallet-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%; text-align: left;
+  font-family: 'Outfit', sans-serif;
+  margin-bottom: 10px;
+}
+.wallet-option:last-child { margin-bottom: 0; }
+.wallet-option:hover { border-color: var(--border-glow); background: var(--surface2); }
+.wallet-option-icon { font-size: 28px; flex-shrink: 0; }
+.wallet-option-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.wallet-option-desc { font-size: 12px; color: var(--text-muted); }
+
+/* ═══════════════════════════════
+   TOASTS
+═══════════════════════════════ */
+#toasts {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 13px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  max-width: 360px; min-width: 260px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  font-size: 13px; color: var(--text-primary);
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.visible { transform: translateX(0); }
+.toast.t-success { border-color: rgba(16,185,129,0.3); }
+.toast.t-error   { border-color: rgba(244,63,94,0.3); }
+.toast.t-info    { border-color: rgba(139,92,246,0.3); }
+.toast-icon { font-size: 16px; flex-shrink: 0; }
+.toast-close { margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 0 0 8px; font-size: 14px; }
+
+/* ═══════════════════════════════
+   CONNECT WALL
+═══════════════════════════════ */
+.connect-wall {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; padding: 60px 24px; text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--border2);
+  border-radius: var(--r-lg);
+}
+.cw-icon { font-size: 52px; margin-bottom: 4px; }
+.cw-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.06em; color: var(--text-primary); }
+.cw-sub { font-size: 13px; color: var(--text-muted); max-width: 320px; line-height: 1.7; }
+
+/* ═══════════════════════════════
+   LOAN PREVIEW PANEL
+═══════════════════════════════ */
+.preview-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+}
+.preview-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.preview-row:last-child { border-bottom: none; }
+.pr-key { font-size: 12px; color: var(--text-muted); }
+.pr-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.pr-val.purple { color: var(--purple-light); }
+.pr-val.green  { color: var(--green); }
+
+/* ═══════════════════════════════
+   SEPARATOR
+═══════════════════════════════ */
+hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.sep-label {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--text-muted); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.1em; font-weight: 600; margin: 20px 0;
+}
+.sep-label::before, .sep-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ═══════════════════════════════
+   UTILITIES
+═══════════════════════════════ */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.flex   { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.gap-8  { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-20 { gap: 20px; }
+.mb-16  { margin-bottom: 16px; }
+.mb-20  { margin-bottom: 20px; }
+.mb-24  { margin-bottom: 24px; }
+.mt-16  { margin-top: 16px; }
+.w-full { width: 100%; }
+.text-right   { text-align: right; }
+.text-center  { text-align: center; }
+.text-primary { color: var(--text-primary); }
+.text-purple  { color: var(--purple-light); }
+.text-green   { color: var(--green); }
+.text-red     { color: var(--red); }
+.text-muted   { color: var(--text-muted); }
+.font-bold    { font-weight: 700; }
+.mono { font-family: 'Courier New', monospace; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ═══════════════════════════════
+   RESPONSIVE
+═══════════════════════════════ */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  aside { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  main { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════
+   ANIMATIONS
+═══════════════════════════════ */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--r-sm);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 48px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.empty-icon { font-size: 44px; opacity: 0.6; }
+.empty-text { font-size: 14px; color: var(--text-muted); max-width: 280px; line-height: 1.6; }
+
+/* Number input no arrows */
+input[type=number] { -moz-appearance: textfield; }
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* Copy button */
+.copy-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 12px;
+  padding: 2px 6px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.copy-btn:hover { color: var(--purple-light); background: var(--purple-dim); }
+
+/* Countdown display */
+.countdown {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--yellow);
+}
+.countdown.expired { color: var(--red); }
+
+/* Input group with suffix */
+.input-group { position: relative; }
+.input-group input { padding-right: 48px; }
+.input-suffix {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; font-weight: 700; color: var(--text-muted);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<!-- Background -->
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <a class="logo-wrap" href="#">
+    <div class="logo-icon">₿</div>
+    <div>
+      <div class="logo-text">Native Bitcoin Credit</div>
+      <div class="logo-sub">OpNet Testnet · P2P Lending</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <div class="net-pill">
+      <div class="pulse-dot"></div>
+      OpNet Testnet
+    </div>
+    <button id="walletBtn" onclick="openWalletModal()">
+      🔗 Connect Wallet
+    </button>
+  </div>
+</header>
+
+<!-- ═══ APP ═══ -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="nav-label">📊 Protocol</div>
+    <div class="nav-item active" data-page="dashboard">
+      <span class="ni-emoji">⚡</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="borrow">
+      <span class="ni-emoji">📥</span> Borrow BTC
+    </div>
+    <div class="nav-item" data-page="lend">
+      <span class="ni-emoji">📤</span> Lend & Earn
+    </div>
+    <div class="nav-item" data-page="loans">
+      <span class="ni-emoji">📋</span> My Loans
+    </div>
+
+    <div class="nav-label">👤 Account</div>
+    <div class="nav-item" data-page="collateral">
+      <span class="ni-emoji">🔒</span> Collateral
+    </div>
+    <div class="nav-item" data-page="credit">
+      <span class="ni-emoji">⭐</span> Credit Score
+    </div>
+    <div class="nav-item" data-page="liquidations">
+      <span class="ni-emoji">⚠️</span> Liquidations
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="protocol-stats">
+        <div class="ps-title">📈 Live Stats</div>
+        <div class="ps-row">
+          <span class="ps-key">Total TVL</span>
+          <span class="ps-val" id="ssTvl">—</span>
+        </div>
+        <div class="ps-row">
+          <span class="ps-key">Active Loans</span>
+          <span class="ps-val" id="ssLoans">—</span>
+        </div>
+        <div class="ps-row">
+          <span class="ps-key">Block Height</span>
+          <span class="ps-val" id="ssBlock">—</span>
+        </div>
+        <div class="ps-row">
+          <span class="ps-key">Min Collateral</span>
+          <span class="ps-val">150%</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- ══════════════════════════════
+         DASHBOARD PAGE
+    ══════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⚡ Dashboard</div>
+          <div class="page-sub">Your Bitcoin credit protocol overview on OpNet Testnet</div>
+        </div>
+      </div>
+
+      <div class="alert alert-purple mb-20">
+        <span class="alert-icon">🟣</span>
+        <div>
+          <strong>OpNet Testnet Live</strong> — This DApp is deployed on OpNet Testnet.
+          Connect your <strong>OP_WALLET</strong> Chrome extension (set to Testnet 3) to interact with the smart contract.
+          Get free tBTC from the <a href="https://faucet.opnet.org" target="_blank" style="color:var(--purple-light);text-decoration:underline">OpNet Faucet</a>.
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon">🔒</span>
+          <div class="stat-label">Your Collateral</div>
+          <div class="stat-value purple" id="dashCollateral">0</div>
+          <div class="stat-sub">sats locked</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">📥</span>
+          <div class="stat-label">Active Borrows</div>
+          <div class="stat-value" id="dashBorrows">0</div>
+          <div class="stat-sub">loans outstanding</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">⭐</span>
+          <div class="stat-label">Credit Score</div>
+          <div class="stat-value purple" id="dashScore">—</div>
+          <div class="stat-sub">on-chain rating</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">💰</span>
+          <div class="stat-label">Available to Borrow</div>
+          <div class="stat-value green" id="dashBorrowPower">0</div>
+          <div class="stat-sub">sats (at 150% col.)</div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="grid-2 mb-20">
+        <div class="card card-glow">
+          <div class="card-title">📥 Borrow BTC</div>
+          <p style="font-size:13px;line-height:1.7;margin-bottom:16px">
+            Lock BTC as collateral and request a peer loan at your desired terms.
+            Collateral ratio is <strong style="color:var(--purple-light)">150%</strong> minimum.
+            All loans are enforced on-chain by the smart contract.
+          </p>
+          <button class="btn btn-primary btn-full" onclick="goTo('borrow')">
+            📥 Start Borrowing →
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-title">📤 Lend & Earn</div>
+          <p style="font-size:13px;line-height:1.7;margin-bottom:16px">
+            Fund open loan requests and earn fixed interest. Every loan is backed by
+            over-collateralized BTC. If a borrower defaults, claim their collateral instantly.
+          </p>
+          <button class="btn btn-outline btn-full" onclick="goTo('lend')">
+            📤 Browse Loans →
+          </button>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card">
+        <div class="card-title">🔧 How It Works</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0">
+          <div style="text-align:center;padding:16px 8px;border-right:1px solid var(--border)">
+            <div style="font-size:28px;margin-bottom:8px">🔒</div>
+            <div style="font-size:12px;color:var(--text-primary);font-weight:600;margin-bottom:4px">1. Deposit</div>
+            <div style="font-size:11px;color:var(--text-muted)">Lock BTC as collateral in the contract</div>
+          </div>
+          <div style="text-align:center;padding:16px 8px;border-right:1px solid var(--border)">
+            <div style="font-size:28px;margin-bottom:8px">📝</div>
+            <div style="font-size:12px;color:var(--text-primary);font-weight:600;margin-bottom:4px">2. Request</div>
+            <div style="font-size:11px;color:var(--text-muted)">Set amount, interest & term</div>
+          </div>
+          <div style="text-align:center;padding:16px 8px;border-right:1px solid var(--border)">
+            <div style="font-size:28px;margin-bottom:8px">✅</div>
+            <div style="font-size:12px;color:var(--text-primary);font-weight:600;margin-bottom:4px">3. Fund</div>
+            <div style="font-size:11px;color:var(--text-muted)">Lender approves & sends principal</div>
+          </div>
+          <div style="text-align:center;padding:16px 8px;border-right:1px solid var(--border)">
+            <div style="font-size:28px;margin-bottom:8px">💸</div>
+            <div style="font-size:12px;color:var(--text-primary);font-weight:600;margin-bottom:4px">4. Repay</div>
+            <div style="font-size:11px;color:var(--text-muted)">Return principal + interest on time</div>
+          </div>
+          <div style="text-align:center;padding:16px 8px">
+            <div style="font-size:28px;margin-bottom:8px">⭐</div>
+            <div style="font-size:12px;color:var(--text-primary);font-weight:600;margin-bottom:4px">5. Score</div>
+            <div style="font-size:11px;color:var(--text-muted)">Build on-chain credit history</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         COLLATERAL PAGE
+    ══════════════════════════════ -->
+    <div class="page" id="page-collateral">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🔒 Collateral Vault</div>
+          <div class="page-sub">Deposit BTC to unlock borrowing capacity</div>
+        </div>
+      </div>
+
+      <div id="collateralGate"></div>
+      <div id="collateralContent">
+        <div class="grid-2 mb-20">
+          <!-- Deposit -->
+          <div class="card">
+            <div class="card-title">⬇️ Deposit Collateral</div>
+            <div class="alert alert-warn mb-16">
+              <span class="alert-icon">⚠️</span>
+              <span>Depositing locks your BTC in the smart contract. It becomes collateral for loans.</span>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <div class="field-label">Amount (satoshis)</div>
+                <div class="input-group">
+                  <input type="number" id="depositAmt" placeholder="100000" min="10000" oninput="updateDepositPreview()">
+                  <span class="input-suffix">sats</span>
+                </div>
+                <div class="field-hint">Min: 10,000 sats · ≈ <span id="depositBtc">0</span> tBTC</div>
+              </div>
+              <button class="btn btn-primary btn-full" id="depositBtn" onclick="depositCollateral()">
+                🔒 Deposit BTC Collateral
+              </button>
+            </div>
+          </div>
+          <!-- Withdraw -->
+          <div class="card">
+            <div class="card-title">⬆️ Withdraw Collateral</div>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:16px">
+              Only collateral <strong>not locked</strong> in active loans can be withdrawn back to your wallet.
+            </p>
+            <div class="form-grid">
+              <div class="field">
+                <div class="field-label">Amount (satoshis)</div>
+                <div class="input-group">
+                  <input type="number" id="withdrawAmt" placeholder="50000" min="1">
+                  <span class="input-suffix">sats</span>
+                </div>
+                <div class="field-hint">Available: <span id="withdrawAvail" class="text-purple">—</span> sats</div>
+              </div>
+              <button class="btn btn-outline btn-full" onclick="withdrawCollateral()">
+                📤 Withdraw
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Position overview -->
+        <div class="card">
+          <div class="card-title">📊 Your Collateral Position</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-bottom:20px">
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">🔒 Locked</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--purple-light)" id="posLocked">0</div>
+              <div style="font-size:11px;color:var(--text-muted)">satoshis</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">💪 Borrowing Power</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green)" id="posBorrowPow">0</div>
+              <div style="font-size:11px;color:var(--text-muted)">max sats loan</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">📈 Col. Ratio</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--text-primary)">150%</div>
+              <div style="font-size:11px;color:var(--text-muted)">minimum required</div>
+            </div>
+          </div>
+          <div class="progress">
+            <div class="progress-fill purple" id="collBar" style="width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <span style="font-size:11px;color:var(--text-muted)">0%</span>
+            <span style="font-size:11px;color:var(--text-muted)">Utilization</span>
+            <span style="font-size:11px;color:var(--text-muted)">100%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         BORROW PAGE
+    ══════════════════════════════ -->
+    <div class="page" id="page-borrow">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📥 Borrow BTC</div>
+          <div class="page-sub">Request a peer-to-peer loan from a specific lender</div>
+        </div>
+      </div>
+
+      <div id="borrowGate"></div>
+      <div id="borrowContent">
+        <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:20px">
+          <!-- Form -->
+          <div class="flex-col gap-16">
+            <div class="card">
+              <div class="card-title">📝 Loan Request Form</div>
+              <div class="form-grid">
+                <div class="field">
+                  <div class="field-label">💰 Principal Amount (sats)</div>
+                  <div class="input-group">
+                    <input type="number" id="bLoanAmt" placeholder="50000" min="1000" oninput="calcBorrow()">
+                    <span class="input-suffix">sats</span>
+                  </div>
+                  <div class="field-hint">Amount you want to borrow · ≈ <span id="bLoanBtc">0</span> tBTC</div>
+                </div>
+                <div class="field">
+                  <div class="field-label">🏦 Lender Address</div>
+                  <input type="text" id="bLender" placeholder="tb1p... or op1... (lender's address)">
+                  <div class="field-hint">OpNet or Bitcoin testnet address of your lender</div>
+                </div>
+                <div class="form-row">
+                  <div class="field">
+                    <div class="field-label">📊 Interest Rate (BP)</div>
+                    <div class="input-group">
+                      <input type="number" id="bInterest" placeholder="500" min="1" max="5000" oninput="calcBorrow()">
+                      <span class="input-suffix">bp</span>
+                    </div>
+                    <div class="field-hint">100 bp = 1%</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">⏰ Term (blocks)</div>
+                    <div class="input-group">
+                      <input type="number" id="bTerm" placeholder="4320" min="144" oninput="calcBorrow()">
+                      <span class="input-suffix">blk</span>
+                    </div>
+                    <div class="field-hint">144 ≈ 1 day</div>
+                  </div>
+                </div>
+                <!-- Quick term selector -->
+                <div class="field">
+                  <div class="field-label">⚡ Quick Term Select</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <button class="btn btn-secondary btn-sm" onclick="setTerm(144)">1 Day</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTerm(1008)">1 Week</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTerm(4320)">30 Days</button>
+                    <button class="btn btn-secondary btn-sm" onclick="setTerm(13140)">3 Months</button>
+                  </div>
+                </div>
+                <div id="borrowValidation" class="field-error" style="display:none"></div>
+                <button class="btn btn-primary btn-full btn-lg" id="borrowSubmitBtn" onclick="requestLoan()">
+                  📝 Submit Loan Request
+                </button>
+              </div>
+            </div>
+
+            <!-- Collateral check -->
+            <div class="card">
+              <div class="card-title">🔒 Collateral Check</div>
+              <div class="lc-body">
+                <div class="lc-row">
+                  <span class="lc-key">Your collateral</span>
+                  <span class="lc-val purple" id="bMyCollateral">—</span>
+                </div>
+                <div class="lc-row">
+                  <span class="lc-key">Required collateral</span>
+                  <span class="lc-val" id="bReqCollateral">—</span>
+                </div>
+                <div class="lc-row">
+                  <span class="lc-key">Status</span>
+                  <span id="bCollStatus"><span class="badge badge-muted">Enter amount</span></span>
+                </div>
+              </div>
+              <div class="progress mt-16">
+                <div class="progress-fill purple" id="bCollBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="flex-col gap-16">
+            <div class="card card-glow">
+              <div class="card-title">👁️ Loan Preview</div>
+              <div class="preview-panel">
+                <div class="preview-row">
+                  <span class="pr-key">💰 Principal</span>
+                  <span class="pr-val purple" id="prevPrincipal">—</span>
+                </div>
+                <div class="preview-row">
+                  <span class="pr-key">💵 Interest Amount</span>
+                  <span class="pr-val" id="prevInterest">—</span>
+                </div>
+                <div class="preview-row">
+                  <span class="pr-key">💳 Total Repayment</span>
+                  <span class="pr-val green" id="prevTotal">—</span>
+                </div>
+                <div class="preview-row">
+                  <span class="pr-key">🔒 Required Collateral</span>
+                  <span class="pr-val" id="prevColl">—</span>
+                </div>
+                <div class="preview-row">
+                  <span class="pr-key">⏰ Term Duration</span>
+                  <span class="pr-val" id="prevTerm">—</span>
+                </div>
+                <div class="preview-row">
+                  <span class="pr-key">📈 Effective APR</span>
+                  <span class="pr-val purple" id="prevApr">—</span>
+                </div>
+                <div class="preview-row">
+                  <span class="pr-key">📊 Interest Rate</span>
+                  <span class="pr-val" id="prevRate">—</span>
+                </div>
+              </div>
+              <div class="alert alert-info mt-16" style="margin-bottom:0">
+                <span class="alert-icon">💡</span>
+                <span>Your lender must call <code>approveLoan()</code> to activate the loan. Once approved, principal is sent to your wallet.</span>
+              </div>
+            </div>
+
+            <!-- My open requests -->
+            <div class="card">
+              <div class="card-title">📋 My Open Requests</div>
+              <div id="myRequestsList">
+                <div class="empty-state" style="padding:24px">
+                  <div class="empty-icon">📭</div>
+                  <div class="empty-text">No loan requests yet. Submit one above.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         LEND PAGE
+    ══════════════════════════════ -->
+    <div class="page" id="page-lend">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📤 Lend & Earn</div>
+          <div class="page-sub">Fund open loan requests and earn fixed interest</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="refreshLend()">↻ Refresh</button>
+      </div>
+
+      <div class="alert alert-success mb-20">
+        <span class="alert-icon">✅</span>
+        <div>All loans shown are <strong>over-collateralized at 150%+</strong>. If a borrower defaults after their term, you can liquidate and claim their locked collateral directly on-chain.</div>
+      </div>
+
+      <!-- Approve by ID -->
+      <div class="card mb-20">
+        <div class="card-title">🤝 Approve a Specific Loan by ID</div>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:16px">
+          If a borrower sent you a loan ID directly (e.g. via DM), enter it here to fund it. You must attach the exact principal amount in BTC.
+        </p>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:120px">
+            <div class="field-label">Loan ID</div>
+            <input type="number" id="lApproveId" placeholder="e.g. 1" min="1">
+          </div>
+          <div class="field" style="flex:2;min-width:180px">
+            <div class="field-label">Principal to Send (sats)</div>
+            <div class="input-group">
+              <input type="number" id="lApprovePrincipal" placeholder="e.g. 50000">
+              <span class="input-suffix">sats</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="approveLoan()">✅ Approve & Fund Loan</button>
+        </div>
+      </div>
+
+      <!-- Open loan offers -->
+      <div class="card-title mb-16">🌐 Open Loan Requests (Available to Fund)</div>
+      <div id="lendOffers">
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-text">Connect your wallet to see available loan requests.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         MY LOANS PAGE
+    ══════════════════════════════ -->
+    <div class="page" id="page-loans">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📋 My Loans</div>
+          <div class="page-sub">Track and manage all your active loans</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="refreshLoans()">↻ Refresh</button>
+      </div>
+
+      <!-- Filter tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:20px" id="loanFilterBtns">
+        <button class="btn btn-primary btn-sm active-filter" onclick="filterLoans('all', this)">All</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterLoans('active', this)">🟢 Active</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterLoans('pending', this)">🟡 Pending</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterLoans('repaid', this)">✅ Repaid</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterLoans('overdue', this)">🔴 Overdue</button>
+      </div>
+
+      <div id="loansList" class="loan-cards">
+        <div style="grid-column:1/-1">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">Connect your wallet to view your loans.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         CREDIT SCORE PAGE
+    ══════════════════════════════ -->
+    <div class="page" id="page-credit">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⭐ Credit Score</div>
+          <div class="page-sub">Your on-chain Bitcoin credit history & rating</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:20px">
+        <div class="flex-col gap-16">
+          <div class="card" style="align-items:center;text-align:center;display:flex;flex-direction:column;gap:20px;padding:28px">
+            <div class="credit-ring-wrap">
+              <div class="credit-ring">
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                  <circle class="crb" cx="70" cy="70" r="65"/>
+                  <circle class="crf" id="creditRingFill" cx="70" cy="70" r="65" stroke="url(#ringGrad)"/>
+                  <defs>
+                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style="stop-color:#6d28d9"/>
+                      <stop offset="100%" style="stop-color:#a78bfa"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="credit-center">
+                  <div class="credit-num" id="creditNum">—</div>
+                  <div class="credit-grade" id="creditGradeEl">—</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted)">Score out of 1,000</div>
+            </div>
+            <div style="width:100%;text-align:left">
+              <div class="lc-row mb-16" style="margin-bottom:10px">
+                <span class="lc-key">Loans Repaid</span>
+                <span class="text-green font-bold" id="creditRepaid">0</span>
+              </div>
+              <div class="lc-row">
+                <span class="lc-key">Defaults</span>
+                <span class="text-red font-bold" id="creditDefaults">0</span>
+              </div>
+            </div>
+          </div>
+          <!-- Score mechanics -->
+          <div class="card">
+            <div class="card-title">⚙️ Score Mechanics</div>
+            <div style="display:grid;gap:10px">
+              <div style="display:flex;justify-content:space-between;padding:10px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--r-sm)">
+                <span style="font-size:12px">✅ On-time repayment</span>
+                <span style="color:var(--green);font-weight:700;font-size:13px">+50 pts</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:10px;background:var(--red-dim);border:1px solid rgba(244,63,94,0.25);border-radius:var(--r-sm)">
+                <span style="font-size:12px">💀 Liquidation/Default</span>
+                <span style="color:var(--red);font-weight:700;font-size:13px">−100 pts</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:10px;background:var(--purple-dim);border:1px solid var(--border-glow);border-radius:var(--r-sm)">
+                <span style="font-size:12px">🌱 First deposit bonus</span>
+                <span style="color:var(--purple-light);font-weight:700;font-size:13px">500 base</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm)">
+                <span style="font-size:12px">🏆 Perfect score ceiling</span>
+                <span style="color:var(--text-primary);font-weight:700;font-size:13px">1,000 max</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Grade table -->
+        <div class="flex-col gap-16">
+          <div class="card">
+            <div class="card-title">📊 Credit Grade Scale</div>
+            <div style="display:grid;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-green">AAA</span>
+                <span style="font-size:12px;color:var(--text-secondary)">900–1000 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">🏆 Excellent — Best rates possible</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-green">AA</span>
+                <span style="font-size:12px;color:var(--text-secondary)">800–899 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">✅ Very Good</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-blue">A</span>
+                <span style="font-size:12px;color:var(--text-secondary)">700–799 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">👍 Good</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-purple">BBB</span>
+                <span style="font-size:12px;color:var(--text-secondary)">600–699 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">⭐ Average — Starting grade</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-yellow">BB</span>
+                <span style="font-size:12px;color:var(--text-secondary)">400–599 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">⚡ Fair</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-red">B</span>
+                <span style="font-size:12px;color:var(--text-secondary)">200–399 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">⚠️ Poor</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+                <span class="badge badge-red">CCC</span>
+                <span style="font-size:12px;color:var(--text-secondary)">0–199 pts</span>
+                <span style="font-size:12px;color:var(--text-muted)">💀 Very Poor — History of defaults</span>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-purple" style="margin:0">
+            <span class="alert-icon">🟣</span>
+            <span>Your credit score is stored <strong>entirely on-chain</strong> in the OpNet smart contract. It cannot be manipulated or changed by any central authority — only by your repayment behavior.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         LIQUIDATIONS PAGE
+    ══════════════════════════════ -->
+    <div class="page" id="page-liquidations">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⚠️ Liquidations</div>
+          <div class="page-sub">Claim collateral from overdue loans</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="refreshLiquidations()">↻ Refresh</button>
+      </div>
+
+      <div class="alert alert-warn mb-20">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <strong>Permissionless Liquidation</strong> — Any address can call <code>liquidate(loanId)</code> after the due block passes.
+          The lender receives the borrower's collateral. Borrower credit score drops by <strong>−100 points</strong>.
+        </div>
+      </div>
+
+      <div class="card mb-20">
+        <div class="card-title">⚡ Trigger Liquidation Manually</div>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:160px">
+            <div class="field-label">Loan ID to Liquidate</div>
+            <input type="number" id="liqId" placeholder="e.g. 3" min="1">
+          </div>
+          <button class="btn btn-danger" onclick="liquidateLoan()">⚡ Execute Liquidation</button>
+        </div>
+      </div>
+
+      <div class="card-title mb-16">🔴 Overdue Loans (Eligible for Liquidation)</div>
+      <div id="liquidationsList">
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <div class="empty-text">No overdue loans found. All borrowers are in good standing.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ WALLET MODAL ═══ -->
+<div class="overlay" id="walletOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔗 Connect Wallet</div>
+      <button class="modal-close" onclick="closeOverlay('walletOverlay')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">
+      Connect an <strong style="color:var(--text-primary)">OpNet-compatible</strong> Bitcoin wallet to interact with the Native Bitcoin Credit protocol on OpNet Testnet.
+    </p>
+
+    <div id="walletOptions">
+      <button class="wallet-option" onclick="connectOpWallet()">
+        <span class="wallet-option-icon">⚡</span>
+        <div>
+          <div class="wallet-option-name">OP_WALLET <span class="badge badge-purple" style="font-size:10px;margin-left:4px">Recommended</span></div>
+          <div class="wallet-option-desc">Official OpNet browser extension · Chrome Web Store</div>
+        </div>
+      </button>
+      <button class="wallet-option" onclick="connectUnisat()">
+        <span class="wallet-option-icon">⬡</span>
+        <div>
+          <div class="wallet-option-name">UniSat Wallet</div>
+          <div class="wallet-option-desc">Taproot + PSBT support · Must set to Testnet</div>
+        </div>
+      </button>
+      <button class="wallet-option" onclick="connectXverse()">
+        <span class="wallet-option-icon">✦</span>
+        <div>
+          <div class="wallet-option-name">Xverse Wallet</div>
+          <div class="wallet-option-desc">Bitcoin + Taproot support</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="alert alert-info mt-16" style="margin-bottom:0">
+      <span class="alert-icon">ℹ️</span>
+      <div>
+        Set your wallet to <strong>Bitcoin Testnet 3</strong> before connecting.
+        Get free tBTC: <a href="https://faucet.opnet.org" target="_blank" style="color:var(--purple-light)">faucet.opnet.org</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TX CONFIRM MODAL ═══ -->
+<div class="overlay" id="txOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="txModalTitle">Confirm Transaction</div>
+      <button class="modal-close" onclick="closeOverlay('txOverlay')">✕</button>
+    </div>
+    <div id="txModalBody"></div>
+    <div style="display:flex;gap:10px;margin-top:22px">
+      <button class="btn btn-secondary w-full" onclick="closeOverlay('txOverlay')">Cancel</button>
+      <button class="btn btn-primary w-full" id="txConfirmBtn">Confirm & Sign</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOASTS ═══ -->
+<div id="toasts"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT — Full wallet connection + all features
+═══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Contract Configuration ─────────────────────────────────────────────────
+const CONFIG = {
+  contractAddress: 'YOUR_DEPLOYED_CONTRACT_ADDRESS', // ← replace after deploy
+  rpcUrl: 'https://testnet.opnet.org',
+  network: 'testnet',
+  blockTime: 10 * 60 * 1000, // 10 minutes in ms
+};
+
+// ─── App State ───────────────────────────────────────────────────────────────
+const APP = {
+  connected: false,
+  address: null,
+  publicKey: null,
+  walletType: null,
+  provider: null,   // actual wallet provider object
+  balance: 0n,
+  collateral: 0n,
+  creditScore: 0n,
+  loansRepaid: 0n,
+  blockHeight: 850000,
+  loans: [],
+  currentLoanFilter: 'all',
+};
+
+// ─── Navigation ──────────────────────────────────────────────────────────────
+function goTo(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById(`page-${name}`);
+  if (page) page.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-page="${name}"]`);
+  if (nav) nav.classList.add('active');
+  window.scrollTo(0, 0);
+  // Trigger page refresh
+  const refreshMap = {
+    credit: refreshCredit,
+    loans: refreshLoans,
+    lend: refreshLend,
+    liquidations: refreshLiquidations,
+    collateral: refreshCollateral,
+    borrow: refreshBorrowPage,
+    dashboard: refreshDashboard,
+  };
+  if (refreshMap[name]) refreshMap[name]();
+}
+
+document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+  el.addEventListener('click', () => goTo(el.dataset.page));
+});
+
+// ─── WALLET CONNECTION ────────────────────────────────────────────────────────
+// OpWallet injects window.opnet (primary) and also window.unisat-compatible API
+// Fallback chain: window.opnet → window.unisat (opwallet forked from unisat)
+
+function openWalletModal() {
+  openOverlay('walletOverlay');
+}
+
+async function connectOpWallet() {
+  closeOverlay('walletOverlay');
+  setWalletBtnLoading(true);
+  try {
+    // OpWallet injects window.opnet OR window.unisat (it's a UniSat fork)
+    const provider = window.opnet || window.unisat;
+    if (!provider) {
+      toast('⚡ OP_WALLET not detected. Please install the extension from Chrome Web Store.', 'error', 7000);
+      window.open('https://chromewebstore.google.com/detail/opwallet/pmbjpcmaaladnfpacpmhmnfmpklgbdjb', '_blank');
+      return;
+    }
+
+    // Request accounts — standard Bitcoin wallet API
+    const accounts = await provider.requestAccounts();
+    if (!accounts || accounts.length === 0) throw new Error('No accounts returned');
+
+    const address = accounts[0];
+
+    // Try to get public key for OpNet contract interactions
+    let publicKey = null;
+    try {
+      publicKey = await provider.getPublicKey();
+    } catch (e) {
+      console.warn('Could not get public key:', e);
+    }
+
+    // Verify testnet (OpWallet/UniSat network check)
+    try {
+      const network = await provider.getNetwork();
+      // network 0 = livenet, 1 = testnet in UniSat API
+      // OpNet might return 'testnet' string
+      if (network === 0 || network === 'livenet') {
+        toast('⚠️ Please switch to Bitcoin Testnet in your wallet settings.', 'warn', 6000);
+      }
+    } catch (e) {
+      // Some wallets don't support getNetwork, proceed anyway
+    }
+
+    APP.provider = provider;
+    onConnected(address, publicKey, 'OP_WALLET');
+
+    // Listen for account changes
+    if (provider.on) {
+      provider.on('accountsChanged', (newAccounts) => {
+        if (newAccounts && newAccounts.length > 0) {
+          APP.address = newAccounts[0];
+          updateWalletButton();
+          toast('🔄 Wallet account changed', 'info');
+          loadUserData();
+        } else {
+          disconnectWallet();
+        }
+      });
+      provider.on('networkChanged', () => {
+        toast('🌐 Network changed. Please ensure you are on Testnet.', 'warn');
+      });
+    }
+
+  } catch (err) {
+    console.error('OP_WALLET connect error:', err);
+    if (err.code === 4001 || err.message?.includes('User rejected')) {
+      toast('❌ Connection rejected by user', 'error');
+    } else if (err.message?.includes('pending')) {
+      toast('⏳ Connection already pending — check your wallet popup', 'warn');
+    } else {
+      toast(`❌ Connection failed: ${err.message || 'Unknown error'}`, 'error');
+    }
+  } finally {
+    setWalletBtnLoading(false);
+  }
+}
+
+async function connectUnisat() {
+  closeOverlay('walletOverlay');
+  setWalletBtnLoading(true);
+  try {
+    if (!window.unisat) {
+      toast('⬡ UniSat wallet not found. Install from unisat.io', 'error');
+      window.open('https://unisat.io', '_blank');
+      return;
+    }
+    const accounts = await window.unisat.requestAccounts();
+    if (!accounts || accounts.length === 0) throw new Error('No accounts');
+    const publicKey = await window.unisat.getPublicKey().catch(() => null);
+    APP.provider = window.unisat;
+    onConnected(accounts[0], publicKey, 'UniSat');
+  } catch (err) {
+    console.error('UniSat connect error:', err);
+    toast(`❌ UniSat: ${err.message || 'Connection failed'}`, 'error');
+  } finally {
+    setWalletBtnLoading(false);
+  }
+}
+
+async function connectXverse() {
+  closeOverlay('walletOverlay');
+  setWalletBtnLoading(true);
+  try {
+    // Xverse uses sats-connect or window.XverseProviders
+    if (window.XverseProviders?.BitcoinProvider) {
+      const provider = window.XverseProviders.BitcoinProvider;
+      const response = await provider.connect({ purposes: ['ordinals', 'payment'] });
+      const addr = response.addresses[0]?.address;
+      if (!addr) throw new Error('No address returned');
+      APP.provider = provider;
+      onConnected(addr, null, 'Xverse');
+    } else {
+      toast('✦ Xverse wallet not detected. Please install from xverse.app', 'error');
+      window.open('https://www.xverse.app', '_blank');
+    }
+  } catch (err) {
+    console.error('Xverse connect error:', err);
+    toast(`❌ Xverse: ${err.message || 'Connection failed'}`, 'error');
+  } finally {
+    setWalletBtnLoading(false);
+  }
+}
+
+function onConnected(address, publicKey, walletType) {
+  APP.connected = true;
+  APP.address = address;
+  APP.publicKey = publicKey;
+  APP.walletType = walletType;
+
+  updateWalletButton();
+  toast(`✅ Connected with ${walletType}`, 'success');
+  loadUserData();
+  startBlockSim();
+}
+
+function disconnectWallet() {
+  APP.connected = false;
+  APP.address = null;
+  APP.publicKey = null;
+  APP.provider = null;
+  APP.walletType = null;
+  APP.collateral = 0n;
+  APP.creditScore = 0n;
+  const btn = document.getElementById('walletBtn');
+  btn.className = '';
+  btn.innerHTML = '🔗 Connect Wallet';
+  btn.onclick = openWalletModal;
+  refreshDashboard();
+}
+
+function updateWalletButton() {
+  const btn = document.getElementById('walletBtn');
+  btn.classList.add('connected');
+  const short = APP.address.length > 16
+    ? APP.address.slice(0,8) + '...' + APP.address.slice(-6)
+    : APP.address;
+  btn.innerHTML = `✅ ${short}`;
+  btn.onclick = () => {
+    if (confirm(`Disconnect wallet?\n${APP.address}`)) disconnectWallet();
+  };
+}
+
+function setWalletBtnLoading(loading) {
+  const btn = document.getElementById('walletBtn');
+  if (loading) {
+    btn.innerHTML = 'Connecting...';
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+    if (!APP.connected) btn.innerHTML = '🔗 Connect Wallet';
+  }
+}
+
+// ─── Check for existing connection on page load ───────────────────────────────
+async function checkExistingConnection() {
+  const provider = window.opnet || window.unisat;
+  if (!provider) return;
+  try {
+    // getAccounts doesn't prompt the user — returns existing if already connected
+    const accounts = await provider.getAccounts();
+    if (accounts && accounts.length > 0) {
+      const publicKey = await provider.getPublicKey().catch(() => null);
+      APP.provider = provider;
+      onConnected(accounts[0], publicKey, window.opnet ? 'OP_WALLET' : 'UniSat');
+      toast(`🔄 Restored ${window.opnet ? 'OP_WALLET' : 'UniSat'} connection`, 'info');
+    }
+  } catch (e) {
+    // Not connected, that's fine
+  }
+}
+
+// ─── Data Loading ─────────────────────────────────────────────────────────────
+async function loadUserData() {
+  if (!APP.connected) return;
+
+  // In production: call OpNet RPC to read contract state
+  // contract.getCollateral(APP.address)
+  // contract.getCreditScore(APP.address)
+  // For demo/testnet preview, we simulate realistic data
+
+  // Simulate async contract read
+  await simulateDelay(600);
+
+  APP.collateral = 150000n;
+  APP.creditScore = 650n;
+  APP.loansRepaid = 3n;
+  APP.balance = 500000n;
+
+  // Mock loans with various statuses
+  APP.loans = [
+    {
+      id: 1n,
+      principal: 50000n, interest: 2500n, totalDue: 52500n,
+      borrower: APP.address,
+      lender: 'tb1p8xk2rqnpjz5g7e0f3a4c1b9d6e2h5m3k8n...',
+      dueBlock: 854320n, active: true, repaid: false, status: 'active',
+      termBlocks: 4320n, apy: 5.0,
+    },
+    {
+      id: 2n,
+      principal: 100000n, interest: 5000n, totalDue: 105000n,
+      borrower: APP.address,
+      lender: 'PENDING',
+      dueBlock: 858640n, active: false, repaid: false, status: 'pending',
+      termBlocks: 8640n, apy: 5.0,
+    },
+    {
+      id: 3n,
+      principal: 25000n, interest: 625n, totalDue: 25625n,
+      borrower: APP.address,
+      lender: 'tb1q7m3c1f5ry8k9j2p4x6w0d5e1n8a3z...',
+      dueBlock: 847200n, active: false, repaid: true, status: 'repaid',
+      termBlocks: 4320n, apy: 2.5,
+    },
+    {
+      id: 4n,
+      principal: 30000n, interest: 900n, totalDue: 30900n,
+      borrower: 'tb1p4a7fk9c3e1x2r8m5n0z6w...',
+      lender: APP.address,
+      dueBlock: 849000n, active: true, repaid: false, status: 'pending',
+      termBlocks: 4320n, apy: 3.0, isLender: true,
+    },
+  ];
+
+  refreshDashboard();
+  refreshCollateral();
+  refreshCredit();
+  updateSidebar();
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+function refreshDashboard() {
+  const activeBorrows = APP.loans.filter(l => l.status === 'active' && l.borrower === APP.address).length;
+  const borrowPow = APP.collateral * 10000n / 15000n;
+
+  document.getElementById('dashCollateral').textContent = APP.collateral.toLocaleString();
+  document.getElementById('dashBorrows').textContent = activeBorrows;
+  document.getElementById('dashScore').textContent = APP.connected
+    ? `${APP.creditScore} (${getCreditGrade(APP.creditScore)})`
+    : '—';
+  document.getElementById('dashBorrowPower').textContent = borrowPow.toLocaleString();
+}
+
+// ─── Collateral Page ──────────────────────────────────────────────────────────
+function refreshCollateral() {
+  const gate = document.getElementById('collateralGate');
+  const content = document.getElementById('collateralContent');
+  if (!APP.connected) {
+    gate.innerHTML = buildConnectWall('🔒', 'Connect wallet to manage collateral');
+    content.style.display = 'none';
+  } else {
+    gate.innerHTML = '';
+    content.style.display = '';
+    const bp = APP.collateral * 10000n / 15000n;
+    document.getElementById('withdrawAvail').textContent = APP.collateral.toLocaleString();
+    document.getElementById('posLocked').textContent = APP.collateral.toLocaleString();
+    document.getElementById('posBorrowPow').textContent = bp.toLocaleString();
+  }
+}
+
+function updateDepositPreview() {
+  const v = document.getElementById('depositAmt').value;
+  document.getElementById('depositBtc').textContent = v ? (Number(v) / 1e8).toFixed(6) : '0';
+}
+
+// ─── Borrow Page ──────────────────────────────────────────────────────────────
+function refreshBorrowPage() {
+  const gate = document.getElementById('borrowGate');
+  const content = document.getElementById('borrowContent');
+  if (!APP.connected) {
+    gate.innerHTML = buildConnectWall('📥', 'Connect wallet to request loans');
+    content.style.display = 'none';
+  } else {
+    gate.innerHTML = '';
+    content.style.display = '';
+    document.getElementById('bMyCollateral').textContent = APP.collateral.toLocaleString() + ' sats';
+    renderMyRequests();
+  }
+}
+
+function setTerm(blocks) {
+  document.getElementById('bTerm').value = blocks;
+  calcBorrow();
+}
+
+function calcBorrow() {
+  const principal = BigInt(document.getElementById('bLoanAmt').value || '0');
+  const bp = BigInt(document.getElementById('bInterest').value || '0');
+  const termBlocks = Number(document.getElementById('bTerm').value || '0');
+  document.getElementById('bLoanBtc').textContent = principal > 0n ? (Number(principal) / 1e8).toFixed(6) : '0';
+
+  if (!principal) {
+    ['prevPrincipal','prevInterest','prevTotal','prevColl','prevTerm','prevApr','prevRate']
+      .forEach(id => document.getElementById(id).textContent = '—');
+    return;
+  }
+
+  const interest = principal * bp / 10000n;
+  const total = principal + interest;
+  const coll = principal * 15000n / 10000n;
+  const days = Math.round(termBlocks / 144);
+  const apr = termBlocks > 0
+    ? ((Number(bp) / 10000) / termBlocks * 52560 * 100).toFixed(2) + '%'
+    : '—';
+
+  document.getElementById('prevPrincipal').textContent = principal.toLocaleString() + ' sats';
+  document.getElementById('prevInterest').textContent = interest.toLocaleString() + ' sats';
+  document.getElementById('prevTotal').textContent = total.toLocaleString() + ' sats';
+  document.getElementById('prevColl').textContent = coll.toLocaleString() + ' sats';
+  document.getElementById('prevTerm').textContent = `${termBlocks.toLocaleString()} blocks (~${days} days)`;
+  document.getElementById('prevApr').textContent = apr;
+  document.getElementById('prevRate').textContent = (Number(bp) / 100).toFixed(2) + '%';
+
+  // Collateral check
+  const reqColl = coll;
+  document.getElementById('bReqCollateral').textContent = reqColl.toLocaleString() + ' sats';
+  const hasEnough = APP.collateral >= reqColl;
+  const pct = APP.collateral > 0n ? Math.min(100, Number(APP.collateral * 100n / (reqColl || 1n))) : 0;
+  document.getElementById('bCollBar').style.width = pct + '%';
+  document.getElementById('bCollStatus').innerHTML = hasEnough
+    ? '<span class="badge badge-green">✅ Sufficient collateral</span>'
+    : `<span class="badge badge-red">❌ Need ${(reqColl - APP.collateral).toLocaleString()} more sats</span>`;
+
+  // Validation message
+  const errEl = document.getElementById('borrowValidation');
+  if (!hasEnough && reqColl > 0n) {
+    errEl.textContent = `⚠️ Insufficient collateral. Deposit at least ${reqColl.toLocaleString()} sats first.`;
+    errEl.style.display = '';
+  } else {
+    errEl.style.display = 'none';
+  }
+}
+
+function renderMyRequests() {
+  const el = document.getElementById('myRequestsList');
+  const myLoans = APP.loans.filter(l => !l.isLender && l.status === 'pending');
+  if (!myLoans.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:24px">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">No open requests. Submit one above.</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = myLoans.map(l => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg2);border-radius:var(--r-sm);margin-bottom:8px;border:1px solid var(--border)">
+      <div>
+        <div style="font-size:12px;color:var(--purple-light);font-weight:600">Loan #${l.id} · ${l.principal.toLocaleString()} sats</div>
+        <div style="font-size:11px;color:var(--text-muted)">⏳ Awaiting lender approval</div>
+      </div>
+      <span class="badge badge-yellow">Pending</span>
+    </div>
+  `).join('');
+}
+
+// ─── Lend Page ────────────────────────────────────────────────────────────────
+function refreshLend() {
+  const el = document.getElementById('lendOffers');
+  if (!APP.connected) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">Connect your wallet to see available loan requests.</div>
+    </div>`;
+    return;
+  }
+
+  const pending = APP.loans.filter(l => l.status === 'pending' && !l.isLender);
+
+  if (!pending.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">No open loan requests at this time. Check back soon.</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="card">
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>📋 Loan #</th>
+          <th>👤 Borrower</th>
+          <th>💰 Principal</th>
+          <th>💵 Interest</th>
+          <th>📈 APY</th>
+          <th>⏰ Term</th>
+          <th>🔒 Collateral</th>
+          <th>⭐ Credit</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pending.map(l => `
+          <tr>
+            <td><span class="text-purple font-bold">#${l.id}</span></td>
+            <td><span class="mono truncate" style="max-width:100px;display:inline-block;font-size:11px">${fmtAddr(l.borrower)}</span></td>
+            <td><strong class="text-primary">${l.principal.toLocaleString()}</strong> <span class="text-muted">sats</span></td>
+            <td>${l.interest.toLocaleString()} <span class="text-muted">sats</span></td>
+            <td><span class="text-green font-bold">${l.apy.toFixed(2)}%</span></td>
+            <td>${(Number(l.termBlocks) / 144).toFixed(0)} <span class="text-muted">days</span></td>
+            <td>${(l.principal * 15000n / 10000n).toLocaleString()} <span class="text-muted">sats</span></td>
+            <td><span class="badge badge-purple">BBB</span></td>
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="quickApprove(${l.id}n, ${l.principal}n)">
+                ✅ Fund →
+              </button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    </div>
+  </div>`;
+}
+
+function quickApprove(loanId, principal) {
+  document.getElementById('lApproveId').value = loanId.toString();
+  document.getElementById('lApprovePrincipal').value = principal.toString();
+  approveLoan();
+}
+
+// ─── My Loans Page ────────────────────────────────────────────────────────────
+function refreshLoans() {
+  const el = document.getElementById('loansList');
+  if (!APP.connected) {
+    el.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-text">Connect your wallet to view your loans.</div>
+    </div></div>`;
+    return;
+  }
+
+  const filtered = APP.currentLoanFilter === 'all'
+    ? APP.loans
+    : APP.loans.filter(l => l.status === APP.currentLoanFilter);
+
+  if (!filtered.length) {
+    el.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">No ${APP.currentLoanFilter === 'all' ? '' : APP.currentLoanFilter + ' '}loans found.</div>
+    </div></div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(l => buildLoanCard(l)).join('');
+}
+
+function filterLoans(type, btn) {
+  APP.currentLoanFilter = type;
+  document.querySelectorAll('#loanFilterBtns .btn').forEach(b => {
+    b.className = 'btn btn-secondary btn-sm';
+  });
+  if (btn) btn.className = 'btn btn-primary btn-sm';
+  refreshLoans();
+}
+
+function buildLoanCard(l) {
+  const statusBadge = {
+    active:     '<span class="badge badge-green">🟢 Active</span>',
+    pending:    '<span class="badge badge-yellow">⏳ Pending Approval</span>',
+    repaid:     '<span class="badge badge-blue">✅ Repaid</span>',
+    overdue:    '<span class="badge badge-red">🔴 Overdue</span>',
+    liquidated: '<span class="badge badge-red">💀 Liquidated</span>',
+  }[l.status] || '<span class="badge badge-muted">Unknown</span>';
+
+  const blocksLeft = l.active ? l.dueBlock - BigInt(APP.blockHeight) : 0n;
+  const isOverdue = l.active && blocksLeft <= 0n;
+  const isMyBorrow = l.borrower === APP.address || !l.isLender;
+  const role = l.isLender ? '📤 You are Lender' : '📥 You are Borrower';
+  const termDays = Math.round(Number(l.termBlocks) / 144);
+
+  let actions = '';
+  if (l.status === 'active' && !l.isLender) {
+    actions = `<button class="btn btn-success btn-sm" onclick="repayLoan(${l.id}n)">💸 Repay Loan</button>`;
+  } else if (l.status === 'pending' && !l.isLender) {
+    actions = `<button class="btn btn-secondary btn-sm" disabled>⏳ Waiting for lender</button>`;
+  } else if (l.status === 'active' && l.isLender) {
+    actions = `<button class="btn btn-secondary btn-sm" disabled>⏳ Waiting for repayment</button>`;
+  }
+  if (isOverdue) {
+    actions += ` <button class="btn btn-danger btn-sm" onclick="liquidateLoan(${l.id}n)">⚡ Liquidate</button>`;
+  }
+
+  return `
+    <div class="loan-card">
+      <div class="lc-header">
+        <span class="lc-id">LOAN #${l.id}</span>
+        ${statusBadge}
+      </div>
+      <div class="lc-body">
+        <div class="lc-row">
+          <span class="lc-key">Role</span>
+          <span style="font-size:12px;color:var(--text-primary);font-weight:500">${role}</span>
+        </div>
+        <div class="lc-row">
+          <span class="lc-key">💰 Principal</span>
+          <span class="lc-val purple">${l.principal.toLocaleString()} sats</span>
+        </div>
+        <div class="lc-row">
+          <span class="lc-key">💵 Total Due</span>
+          <span class="lc-val">${l.totalDue.toLocaleString()} sats</span>
+        </div>
+        <div class="lc-row">
+          <span class="lc-key">📈 APY</span>
+          <span class="lc-val green">${l.apy.toFixed(2)}%</span>
+        </div>
+        <div class="lc-row">
+          <span class="lc-key">⏰ Term</span>
+          <span class="lc-val">${termDays} days (~${l.termBlocks.toLocaleString()} blocks)</span>
+        </div>
+        ${l.active ? `
+        <div class="lc-row">
+          <span class="lc-key">🕐 Remaining</span>
+          <span class="${isOverdue ? 'text-red' : 'text-primary'} font-bold" style="font-size:12px">
+            ${isOverdue ? '🔴 OVERDUE' : `${blocksLeft.toLocaleString()} blocks`}
+          </span>
+        </div>` : ''}
+        <div class="lc-row">
+          <span class="lc-key">${l.isLender ? '👤 Borrower' : '🏦 Lender'}</span>
+          <span class="lc-val" style="font-size:11px">${l.isLender ? fmtAddr(l.borrower) : fmtAddr(l.lender)}</span>
+        </div>
+      </div>
+      ${l.active ? `
+      <div class="progress" style="margin-bottom:12px">
+        <div class="progress-fill ${isOverdue ? 'red' : 'purple'}" style="width:${isOverdue ? 100 : Math.max(0, Math.min(100, 100 - Number(blocksLeft * 100n / l.termBlocks)))}%"></div>
+      </div>` : ''}
+      <div class="lc-actions">${actions}</div>
+    </div>`;
+}
+
+// ─── Credit Score ─────────────────────────────────────────────────────────────
+function getCreditGrade(score) {
+  const n = Number(score);
+  if (n >= 900) return 'AAA';
+  if (n >= 800) return 'AA';
+  if (n >= 700) return 'A';
+  if (n >= 600) return 'BBB';
+  if (n >= 400) return 'BB';
+  if (n >= 200) return 'B';
+  if (n > 0)   return 'CCC';
+  return 'NEW';
+}
+
+function refreshCredit() {
+  const score = Number(APP.creditScore);
+  document.getElementById('creditNum').textContent = APP.connected ? score : '—';
+  document.getElementById('creditGradeEl').textContent = APP.connected ? getCreditGrade(APP.creditScore) : '—';
+  document.getElementById('creditRepaid').textContent = APP.loansRepaid.toString();
+  document.getElementById('creditDefaults').textContent = '0';
+
+  // Animate ring
+  if (APP.connected) {
+    const pct = score / 1000;
+    const circumference = 408; // 2 * Math.PI * 65
+    const offset = circumference - (pct * circumference);
+    const ring = document.getElementById('creditRingFill');
+    ring.style.strokeDashoffset = offset;
+
+    // Color ring by score
+    if (score >= 700) ring.style.stroke = 'var(--green)';
+    else if (score >= 500) ring.style.stroke = 'url(#ringGrad)';
+    else ring.style.stroke = 'var(--red)';
+  }
+}
+
+// ─── Liquidations ─────────────────────────────────────────────────────────────
+function refreshLiquidations() {
+  const el = document.getElementById('liquidationsList');
+  const overdue = APP.loans.filter(l => l.active && l.dueBlock < BigInt(APP.blockHeight));
+  if (!overdue.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">✅</div>
+      <div class="empty-text">No overdue loans found. All borrowers are in good standing.</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = `<div class="card"><div class="table-wrap"><table>
+    <thead><tr>
+      <th>Loan #</th><th>Borrower</th><th>Collateral</th><th>Overdue by</th><th>Action</th>
+    </tr></thead>
+    <tbody>
+      ${overdue.map(l => `<tr>
+        <td class="text-purple font-bold">#${l.id}</td>
+        <td><span class="mono" style="font-size:11px">${fmtAddr(l.borrower)}</span></td>
+        <td>${(l.principal * 15000n / 10000n).toLocaleString()} sats</td>
+        <td class="text-red font-bold">${(BigInt(APP.blockHeight) - l.dueBlock).toLocaleString()} blocks</td>
+        <td><button class="btn btn-danger btn-sm" onclick="liquidateLoan(${l.id}n)">⚡ Liquidate</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+// ─── CONTRACT INTERACTIONS ────────────────────────────────────────────────────
+
+async function depositCollateral() {
+  if (!checkWallet()) return;
+  const amt = BigInt(document.getElementById('depositAmt').value || '0');
+  if (amt < 10000n) { toast('❌ Minimum deposit is 10,000 sats', 'error'); return; }
+
+  showTxModal('🔒 Deposit Collateral', `
+    <div class="preview-panel">
+      <div class="preview-row"><span class="pr-key">Action</span><span class="pr-val">Deposit BTC as Collateral</span></div>
+      <div class="preview-row"><span class="pr-key">💰 Amount</span><span class="pr-val purple">${amt.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">📄 Contract</span><span class="pr-val mono" style="font-size:11px">${fmtAddr(CONFIG.contractAddress)}</span></div>
+      <div class="preview-row"><span class="pr-key">🌐 Network</span><span class="pr-val">OpNet Testnet</span></div>
+    </div>
+    <div class="alert alert-warn mt-16" style="margin-bottom:0">
+      <span class="alert-icon">⚠️</span>
+      <span>This sends <strong>${amt.toLocaleString()} sats</strong> to the lending contract and calls <code>depositCollateral()</code>.</span>
+    </div>
+  `, async () => {
+    // Production: call via OpNet SDK
+    // const result = await contract.depositCollateral({ value: amt });
+    await simulateContractCall('depositCollateral', amt);
+    APP.collateral += amt;
+    refreshCollateral(); refreshDashboard(); updateSidebar();
+    toast(`✅ Deposited ${amt.toLocaleString()} sats as collateral! 🔒`, 'success');
+  });
+}
+
+async function withdrawCollateral() {
+  if (!checkWallet()) return;
+  const amt = BigInt(document.getElementById('withdrawAmt').value || '0');
+  if (amt <= 0n) { toast('❌ Enter withdrawal amount', 'error'); return; }
+  if (amt > APP.collateral) { toast('❌ Insufficient available collateral', 'error'); return; }
+
+  showTxModal('📤 Withdraw Collateral', `
+    <div class="preview-panel">
+      <div class="preview-row"><span class="pr-key">Action</span><span class="pr-val">Withdraw Collateral</span></div>
+      <div class="preview-row"><span class="pr-key">💰 Amount</span><span class="pr-val purple">${amt.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">💳 Remaining</span><span class="pr-val">${(APP.collateral - amt).toLocaleString()} sats</span></div>
+    </div>
+  `, async () => {
+    await simulateContractCall('withdrawCollateral', amt);
+    APP.collateral -= amt;
+    refreshCollateral(); refreshDashboard(); updateSidebar();
+    toast(`✅ Withdrawn ${amt.toLocaleString()} sats to your wallet 📤`, 'success');
+  });
+}
+
+async function requestLoan() {
+  if (!checkWallet()) return;
+
+  const principal = BigInt(document.getElementById('bLoanAmt').value || '0');
+  const lender = document.getElementById('bLender').value.trim();
+  const bp = BigInt(document.getElementById('bInterest').value || '0');
+  const termBlocks = BigInt(document.getElementById('bTerm').value || '0');
+
+  if (!principal || principal < 1000n) { toast('❌ Enter a valid principal (min 1,000 sats)', 'error'); return; }
+  if (!lender) { toast('❌ Enter the lender\'s address', 'error'); return; }
+  if (!bp || bp < 1n) { toast('❌ Enter a valid interest rate', 'error'); return; }
+  if (bp > 5000n) { toast('❌ Interest rate cannot exceed 50% (5000 bp)', 'error'); return; }
+  if (!termBlocks || termBlocks < 144n) { toast('❌ Minimum term is 144 blocks (~1 day)', 'error'); return; }
+
+  const reqColl = principal * 15000n / 10000n;
+  if (APP.collateral < reqColl) {
+    toast(`❌ Need ${reqColl.toLocaleString()} sats collateral. You have ${APP.collateral.toLocaleString()} sats. Deposit more first.`, 'error', 6000);
+    return;
+  }
+
+  const interest = principal * bp / 10000n;
+  const total = principal + interest;
+  const days = Math.round(Number(termBlocks) / 144);
+
+  showTxModal('📝 Submit Loan Request', `
+    <div class="preview-panel">
+      <div class="preview-row"><span class="pr-key">💰 Principal</span><span class="pr-val purple">${principal.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">💵 Interest</span><span class="pr-val">${interest.toLocaleString()} sats (${Number(bp)/100}%)</span></div>
+      <div class="preview-row"><span class="pr-key">💳 Total Due</span><span class="pr-val green">${total.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">🔒 Collateral</span><span class="pr-val">${reqColl.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">⏰ Term</span><span class="pr-val">${termBlocks.toLocaleString()} blocks (~${days} days)</span></div>
+      <div class="preview-row"><span class="pr-key">🏦 Lender</span><span class="pr-val mono" style="font-size:11px">${fmtAddr(lender)}</span></div>
+    </div>
+    <div class="alert alert-info mt-16" style="margin-bottom:0">
+      <span class="alert-icon">💡</span>
+      <span>This calls <code>requestLoan(lender, principal, interestBP, termBlocks)</code>. No BTC is sent — your collateral is already locked.</span>
+    </div>
+  `, async () => {
+    await simulateContractCall('requestLoan', 0n);
+    const newId = BigInt(APP.loans.length + 1);
+    APP.loans.push({
+      id: newId, principal, interest, totalDue: total,
+      borrower: APP.address, lender,
+      dueBlock: BigInt(APP.blockHeight) + termBlocks,
+      active: false, repaid: false, status: 'pending',
+      termBlocks, apy: (Number(bp) / 10000 / Number(termBlocks) * 52560 * 100),
+    });
+    renderMyRequests();
+    toast(`✅ Loan #${newId} requested! Waiting for lender to approve. 📝`, 'success', 5000);
+    // Clear form
+    document.getElementById('bLoanAmt').value = '';
+    document.getElementById('bLender').value = '';
+    document.getElementById('bInterest').value = '';
+    document.getElementById('bTerm').value = '';
+    calcBorrow();
+  });
+}
+
+async function approveLoan() {
+  if (!checkWallet()) return;
+  const loanId = BigInt(document.getElementById('lApproveId').value || '0');
+  const principal = BigInt(document.getElementById('lApprovePrincipal').value || '0');
+
+  if (!loanId) { toast('❌ Enter a valid Loan ID', 'error'); return; }
+  if (!principal || principal <= 0n) { toast('❌ Enter principal amount to send', 'error'); return; }
+
+  showTxModal('✅ Approve & Fund Loan', `
+    <div class="preview-panel">
+      <div class="preview-row"><span class="pr-key">📋 Loan ID</span><span class="pr-val purple">#${loanId}</span></div>
+      <div class="preview-row"><span class="pr-key">💰 Sending</span><span class="pr-val green">${principal.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">📋 Call</span><span class="pr-val"><code>approveLoan(${loanId})</code></span></div>
+    </div>
+    <div class="alert alert-warn mt-16" style="margin-bottom:0">
+      <span class="alert-icon">⚠️</span>
+      <span>You are sending <strong>${principal.toLocaleString()} sats</strong> to the borrower. The collateral is locked in the contract until repayment or term expiry.</span>
+    </div>
+  `, async () => {
+    await simulateContractCall('approveLoan', principal);
+    const loan = APP.loans.find(l => l.id === loanId);
+    if (loan) {
+      loan.status = 'active'; loan.active = true;
+      loan.dueBlock = BigInt(APP.blockHeight) + loan.termBlocks;
+    }
+    refreshLoans(); refreshLend();
+    toast(`✅ Loan #${loanId} approved and funded! Principal sent to borrower. 🚀`, 'success', 5000);
+    document.getElementById('lApproveId').value = '';
+    document.getElementById('lApprovePrincipal').value = '';
+  });
+}
+
+async function repayLoan(loanId) {
+  if (!checkWallet()) return;
+  const loan = APP.loans.find(l => l.id === loanId);
+  if (!loan) { toast('❌ Loan not found', 'error'); return; }
+
+  showTxModal('💸 Repay Loan', `
+    <div class="preview-panel">
+      <div class="preview-row"><span class="pr-key">📋 Loan ID</span><span class="pr-val purple">#${loanId}</span></div>
+      <div class="preview-row"><span class="pr-key">💰 Principal</span><span class="pr-val">${loan.principal.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">💵 Interest</span><span class="pr-val">${loan.interest.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">💳 Total Sending</span><span class="pr-val green">${loan.totalDue.toLocaleString()} sats</span></div>
+      <div class="preview-row"><span class="pr-key">🏦 To Lender</span><span class="pr-val mono" style="font-size:11px">${fmtAddr(loan.lender)}</span></div>
+      <div class="preview-row"><span class="pr-key">⭐ Credit Score</span><span class="pr-val green">+50 pts after repayment</span></div>
+    </div>
+    <div class="alert alert-success mt-16" style="margin-bottom:0">
+      <span class="alert-icon">✅</span>
+      <span>After repayment, your collateral is unlocked and returned to your vault. Your credit score increases by 50 points.</span>
+    </div>
+  `, async () => {
+    await simulateContractCall('repayLoan', loan.totalDue);
+    loan.status = 'repaid'; loan.active = false; loan.repaid = true;
+    APP.creditScore = APP.creditScore + 50n > 1000n ? 1000n : APP.creditScore + 50n;
+    APP.loansRepaid++;
+    refreshLoans(); refreshCredit(); refreshDashboard();
+    toast(`✅ Loan #${loanId} repaid! ⭐ Credit score +50 pts. Collateral unlocked 🔓`, 'success', 6000);
+  });
+}
+
+async function liquidateLoan(loanIdParam) {
+  if (!checkWallet()) return;
+  const loanId = loanIdParam || BigInt(document.getElementById('liqId').value || '0');
+  if (!loanId) { toast('❌ Enter a loan ID to liquidate', 'error'); return; }
+
+  showTxModal('⚡ Execute Liquidation', `
+    <div class="preview-panel">
+      <div class="preview-row"><span class="pr-key">📋 Loan ID</span><span class="pr-val purple">#${loanId}</span></div>
+      <div class="preview-row"><span class="pr-key">📋 Call</span><span class="pr-val"><code>liquidate(${loanId})</code></span></div>
+      <div class="preview-row"><span class="pr-key">🎯 Result</span><span class="pr-val text-red">Lender receives collateral</span></div>
+    </div>
+    <div class="alert alert-warn mt-16" style="margin-bottom:0">
+      <span class="alert-icon">⚠️</span>
+      <span>Liquidation is <strong>irreversible</strong>. The lender receives the locked collateral. Borrower's credit score drops by 100 points.</span>
+    </div>
+  `, async () => {
+    await simulateContractCall('liquidate', 0n);
+    const loan = APP.loans.find(l => l.id === loanId);
+    if (loan) { loan.status = 'liquidated'; loan.active = false; }
+    refreshLiquidations(); refreshLoans();
+    toast(`⚡ Loan #${loanId} liquidated. Collateral transferred to lender.`, 'success');
+  });
+}
+
+// ─── TX Modal ─────────────────────────────────────────────────────────────────
+function showTxModal(title, body, onConfirm) {
+  document.getElementById('txModalTitle').textContent = title;
+  document.getElementById('txModalBody').innerHTML = body;
+  const btn = document.getElementById('txConfirmBtn');
+
+  btn.onclick = async () => {
+    closeOverlay('txOverlay');
+    const orig = btn.textContent;
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    try {
+      await onConfirm();
+    } catch(err) {
+      console.error(err);
+      toast(`❌ Transaction failed: ${err.message || 'Unknown error'}`, 'error');
+    } finally {
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+  };
+  openOverlay('txOverlay');
+}
+
+// ─── Simulated contract call (replace with real OpNet SDK calls) ──────────────
+async function simulateContractCall(method, value) {
+  // In production, this would be:
+  // const provider = APP.provider;
+  // const network = Network.Testnet;
+  // const opnetProvider = new JSONRpcProvider(CONFIG.rpcUrl, network);
+  // const contract = getContract(CONFIG.contractAddress, LENDING_ABI, opnetProvider, network, APP.address);
+  // return await contract[method]({ value });
+
+  // For testnet demo — simulates the ~1-2 second signing flow
+  toast(`📡 Broadcasting ${method}() to OpNet Testnet...`, 'info', 3000);
+  await simulateDelay(1500);
+
+  // Simulate wallet signing prompt
+  if (APP.provider) {
+    try {
+      // Real OpNet interaction would go here
+      // const result = await APP.provider.signAndBroadcast(...);
+    } catch (e) {
+      // Continue with simulation
+    }
+  }
+  return { txid: '0x' + Math.random().toString(16).slice(2, 66) };
+}
+
+// ─── Sidebar stats ─────────────────────────────────────────────────────────────
+function updateSidebar() {
+  document.getElementById('ssTvl').textContent = (Number(APP.collateral) / 1e8).toFixed(4) + ' tBTC';
+  document.getElementById('ssLoans').textContent = APP.loans.filter(l => l.active).length;
+}
+
+function startBlockSim() {
+  document.getElementById('ssBlock').textContent = APP.blockHeight.toLocaleString();
+  setInterval(() => {
+    if (Math.random() < 0.3) {
+      APP.blockHeight++;
+      document.getElementById('ssBlock').textContent = APP.blockHeight.toLocaleString();
+    }
+  }, 8000);
+}
+
+// ─── Overlays ──────────────────────────────────────────────────────────────────
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ─── Toasts ────────────────────────────────────────────────────────────────────
+let toastId = 0;
+function toast(msg, type = 'info', duration = 4000) {
+  const id = ++toastId;
+  const icons = { success: '✅', error: '❌', info: '💜', warn: '⚠️' };
+  const el = document.createElement('div');
+  el.className = `toast t-${type}`;
+  el.id = `toast-${id}`;
+  el.innerHTML = `
+    <span class="toast-icon">${icons[type] || '💜'}</span>
+    <span style="flex:1;font-size:13px;line-height:1.5">${msg}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('toasts').appendChild(el);
+  requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('visible')); });
+  setTimeout(() => {
+    el.classList.remove('visible');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function checkWallet() {
+  if (!APP.connected) {
+    toast('🔗 Connect your wallet first', 'warn');
+    openWalletModal();
+    return false;
+  }
+  return true;
+}
+
+function buildConnectWall(icon, text) {
+  return `<div class="connect-wall mb-20">
+    <div class="cw-icon">${icon}</div>
+    <div class="cw-title">Connect Your Wallet</div>
+    <div class="cw-sub">${text}</div>
+    <button class="btn btn-primary" onclick="openWalletModal()">🔗 Connect Wallet</button>
+  </div>`;
+}
+
+function fmtAddr(addr) {
+  if (!addr || addr === 'PENDING') return addr || '—';
+  if (addr.length > 20) return addr.slice(0, 10) + '...' + addr.slice(-6);
+  return addr;
+}
+
+function simulateDelay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  // Attempt to restore existing wallet connection after brief delay
+  // (wallets need time to inject their providers)
+  setTimeout(checkExistingConnection, 500);
+
+  // Show welcome
+  setTimeout(() => {
+    toast('🟣 Welcome to Native Bitcoin Credit on OpNet Testnet', 'info', 5000);
+  }, 800);
+});
+
+// Keyboard shortcut: Escape closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>
